@@ -52,13 +52,11 @@ To know more about **selenium**. Click here <https://selenium-python.readthedocs
 
 This project contains three files
 
-[text](datainsertion.py)
-[text](redbusmain.py)
-[text](streamlit.py)
-[text](streamlit.py)
+(datainsertion.py)
+(redbusmain.py)
+(streamlit.py)
 
-
-**1) [text](redbusmain.py)**
+**1) (redbusmain.py)**
 
 This Python script uses the Selenium library to automate web scraping from the Redbus website and process the data using pandas. The script follows these main steps:
 
@@ -75,7 +73,7 @@ This Python script uses the Selenium library to automate web scraping from the R
    1. (Commented out) Extracts detailed bus information and saves it to a CSV file.
    1. Closes the browser.
 
-**2) [text](datainsertion.py)**
+**2) (datainsertion.py)**
 
 - This Python script facilitates the extraction, transformation, and loading (ETL) of bus route and bus details data into a MySQL database. It begins by importing the necessary modules, including mysql.connector for database operations and pandas for data manipulation. The script defines several functions for different stages of the ETL process:
 - **SQL\_Connection**: Establishes a connection to a MySQL database using provided configuration details and returns the connection and cursor objects.
@@ -92,7 +90,7 @@ This Python script uses the Selenium library to automate web scraping from the R
 - Closing the database connection and cursor to clean up resources.
 - This script ensures that data is accurately transferred from CSV files to a MySQL database, with robust error handling at each step to manage potential issues..
 
-**3) [text](streamlit.py)**
+**3) (streamlit.py)**
 
 This Streamlit application enables users to search and book bus tickets using the Redbus platform. It integrates with a MySQL database to fetch and display bus information based on user-selected filters.
 
@@ -118,10 +116,10 @@ Overall, this application provides a user-friendly interface for searching and b
 
 **How to run the code:**
 
-Initially run the “[text](redbusmain.py)”  in terminal. Wait until it completely scraping the 10 bus routes data.
+Initially run the “(redbusmain.py)”  in terminal. Wait until it completely scraping the 10 bus routes data.
 
-After the data is scraped and the data are stored as a csv file run "[text](datainsertion.py)" to store the data the SQL database.
+After the data is scraped and the data are stored as a csv file run "(datainsertion.py)" to store the data the SQL database.
 
-[text](bus_data.csv) & [text](route_data.csv) will be the csv files to store in the database 
+(bus_data.csv) & (route_data.csv) will be the csv files to store in the database 
 
-After finishing the scraping process run “[text](streamlit.py)” using command “**streamlit run [text](streamlit.py)**”
+After finishing the scraping process run “(streamlit.py)” using command “**streamlit run (streamlit.py)**”
