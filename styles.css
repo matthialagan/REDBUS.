@@ -1,0 +1,97 @@
+body {
+    background-image: url('https://media.istockphoto.com/id/1197014116/photo/travel-company-bus.jpg?s=612x612&w=0&k=20&c=IuJZJW5QbNpzToIOnZ0rY4hLQ-F4GIc-iechEQlf_Wc=');
+    background-size: cover;
+    background-attachment: fixed;
+    background-position: center; /* Center the background image */
+}
+
+.stApp {
+    background: rgba(255, 255, 255, 0.8);
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    color: #ff5a5f;
+    font-family: 'Arial', sans-serif;
+    font-size: 36px;
+    font-weight: bold;
+    text-align: left;
+}
+
+/* Sidebar Styling */
+.stSidebar {
+    background-color: white !important; /* Ensure sidebar background is white */
+}
+
+.stSidebar .sidebar-content {
+    background-color: white !important; /* Ensure content background is white */
+    color: black !important;            /* Set text color to black */
+    padding: 10px;
+    border-radius: 15px;
+}
+
+.stSidebar .nav-link {
+    color: black !important;
+    font-weight: bold;
+}
+
+.stSidebar .nav-link:hover {
+    background-color: #ffa07a;
+}
+
+/* Selectbox and Input Styles */
+.stSidebar select {
+    border: 2px solid red !important; /* Red border for selectbox */
+    border-radius: 4px !important;    /* Rounded corners */
+    padding: 5px !important;          /* Padding inside the selectbox */
+    color: black !important;          /* Text color */
+    background-color: white !important; /* Background color for selectbox */
+}
+
+.stSidebar select:focus {
+    outline: none !important;         /* Remove default outline on focus */
+    border-color: red !important;     /* Maintain red border on focus */
+}
+
+.stSidebar input {
+    border: 1px solid #ccc !important; /* Border for input fields */
+    border-radius: 4px !important;    /* Rounded corners */
+    padding: 5px !important;          /* Padding inside the input */
+    color: black !important;          /* Text color */
+    background-color: white !important; /* Background color for input */
+}
+
+.stSidebar input:focus {
+    outline: none !important;         /* Remove default outline on focus */
+    border-color: #ff5a5f !important; /* Change border color on focus */
+}
+
+.stButton>button {
+    color: white;
+    background-color: #ff5a5f;
+    border-radius: 5px;
+    border: none;
+    padding: 8px 16px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.stButton>button:hover {
+    background-color: #ffa07a;
+}
+
+.red-white-button {
+    font-weight: bold;
+    color: white;
+    background-color: red;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+}
+
+.red-white-button:hover {
+    background-color: darkred;
+}
