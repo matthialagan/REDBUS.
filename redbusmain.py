@@ -244,3 +244,32 @@ name_link_state,route_ref,route_number=route_name_ref(driver,link_states,state_n
 bus_details=fetch_bus_datas(driver,route_ref,route_number) #calls the fetch_bus_data (this will scrape the bus details of the specific routes)
 
 quit_driver(driver) #quitting the driver after fetching the data
+
+
+# convert the bus_details into dataframe 
+bus_data=pd.DataFrame(data=bus_details,columns=['bus_no','bus_name','bus_type','departing_time','duration','reaching_time','star_rating','price','seat_availability'])
+bus_data['star_rating'] = bus_data['star_rating'].fillna(0)
+
+
+# convert the route_details into dataframe 
+normal_route_data=pd.DataFrame(data=name_link_state,columns=['route_no','state_name','route_name','route_ref'])
+print("length of route_data",len(normal_route_data))
+
+#check whether the bus_no and route_no is same
+unique_bus_no = bus_data['bus_no'].unique()
+route_data= normal_route_data[normal_route_data['route_no'].isin(unique_bus_no)]
+
+
+# write the route_data and bus_data in .csv file for reference
+route_data.to_csv('route_data.csv',index=False,mode='w')
+bus_data.to_csv('bus_data.csv',index=False,mode='w')
+
+
+#check both bus_no from bus_data and route_no from route_data is same (--------------testing------------)
+unique_bus_no = bus_data['bus_no'].unique()
+unique_route_no = route_data['route_no'].unique()
+
+if set(unique_bus_no) == set(unique_route_no):
+    print("The unique bus numbers and route numbers match.")
+else:
+    print("The unique bus numbers and route numbers do not match.")
