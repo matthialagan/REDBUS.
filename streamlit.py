@@ -27,6 +27,7 @@ def configuration():
         st.error(f"Error occurred during configuration: {e}")
         return None
 
+
 def connection():
     try:
         config = configuration()
@@ -84,6 +85,9 @@ st.markdown("**Welcome to Redbus! 👉 Find and book bus tickets easily. Use the
 bus_image_url = "https://media.istockphoto.com/id/1312644983/vector/modern-city-passenger-bus-against-the-background-of-an-abstract-cityscape-vector-illustration.jpg?s=612x612&w=0&k=20&c=QNTyvmklpvs4cT-JzD-DjmdK_EsN8Wh6I5sLZ9UoB_E="
 st.sidebar.image(bus_image_url, use_container_width=True)
 
+
+
+
 st.markdown("""
 <style>
     [data-testid=stSidebar] {
@@ -95,21 +99,42 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.sidebar.header("Filter Options 🔽")
-bus_type_query = "SELECT DISTINCT Bus_Type FROM BusDetails;"
-bus_types = fetch_distinct_value(conn, bus_type_query)
-bus_type = st.sidebar.selectbox("**Seat Type**", ['--- select bus type ---'] + ['All'] + bus_types)
+bus_type_query = """
+    SELECT DISTINCT 
+        CASE 
+            WHEN Bus_Type LIKE '%Seater%' AND Bus_Type NOT LIKE '%Sleeper%'  THEN 'AC Seater' 
+            WHEN Bus_Type LIKE '%Sleeper%' AND Bus_Type NOT LIKE '%Seater%' THEN 'Sleeper' 
+            WHEN Bus_Type LIKE '%NON AC%' OR '%Sleeper%' AND Bus_Type NOT LIKE '%AC%' THEN 'NON AC' 
+            WHEN Bus_Type LIKE '%AC%' OR Bus_Type LIKE '%A/C%' AND Bus_Type NOT LIKE '%Non AC%' THEN 'AC' 
+            ELSE 'Others' 
+        END AS Bus_Category,
+        COUNT(*) AS Bus_Count
+    FROM BusDetails 
+    GROUP BY Bus_Category 
+    ORDER BY Bus_Count DESC;
+"""
+st.sidebar.markdown("#### BUS TYPE")
+bus_type_seater = st.sidebar.checkbox("Seater", key="bus_type_seater")
+bus_type_sleeper = st.sidebar.checkbox("Sleeper", key="bus_type_sleeper")
+bus_type_ac = st.sidebar.checkbox("AC", key="bus_type_ac")
+bus_type_nonac = st.sidebar.checkbox("Non AC", key="bus_type_nonac")
+
+
+filtered_df = pd.DataFrame()  # Initialize filtered_df
+
+
 
 st.sidebar.markdown("#### PRICE RANGE")
 min_price = 0  # Adjusted minimum price
 max_price = 5000  # Adjusted maximum price
 price_range = st.sidebar.slider("Select Price Range", min_price, max_price, (min_price, max_price), 100)
 
-st.sidebar.markdown("#### rating_range")
+st.sidebar.markdown("#### RATING RANGE")
 rating_3_plus = st.sidebar.checkbox("3+ Stars", key="rating_3_plus")
 rating_4_plus = st.sidebar.checkbox("4+ Stars", key="rating_4_plus")
 rating_5 = st.sidebar.checkbox("5 Stars", key="rating_5")
 
-st.sidebar.markdown("#### departure_range")
+st.sidebar.markdown("#### DEPARTURE RANGE")
 dt_before_6am = st.sidebar.checkbox("Before 6 am", key="dt_before_6am")
 dt_6am_to_12pm = st.sidebar.checkbox("6 am to 12 pm", key="dt_6am_to_12pm")
 dt_12pm_to_6pm = st.sidebar.checkbox("12 pm to 6 pm", key="dt_12pm_to_6pm")
@@ -119,14 +144,40 @@ dt_after_6pm = st.sidebar.checkbox("After 6 pm", key="dt_after_6pm")
 # Main Page Layout
 col1, col2 = st.columns(2)
 
+bus_services = {
+    'APSRTC': 'Andhra Pradesh State Road Transport Corporation (APSRTC)',
+    'KSRTC (Kerala)': 'Kerala State Road Transport Corporation (KSRTC)',
+    'PEPSU (Punjab)': 'Patiala and East Punjab States Union (PEPSU)',
+    'RSRTC': 'Rajasthan State Road Transport Corporation (RSRTC)',
+    'HRTC': 'Himachal Road Transport Corporation (HRTC)',
+    'Kadamba Transport Corporation Limited (KTCL)': 'Kadamba Transport Corporation Limited (KTCL)',
+    'MTC': 'Meghalaya Transport Corporation (MTC)',
+    'ASTC': 'Assam State Transport Corporation (ASTC)',
+    'KAAC Transport': 'Karbi Anglong Autonomous Council Transport (KAAC Transport)',
+    'CTU': 'Chandigarh Transport Undertaking (CTU)'
+}
+
 with col1:
     state_query = "SELECT DISTINCT State_TransportationName FROM BusRoutesAndLinks;"
     states = fetch_distinct_value(conn, state_query)
-    state = st.selectbox("**States Transportation Name**", ['--- select state ---'] + states)
+    
+    # Create a dictionary to map abbreviations to display names
+    display_names = {k: f"{v}" for k, v in bus_services.items() if k in states}
+    
+    # Create a list of display names for the selectbox
+    display_name_list = ['--- select state ---'] + [display_names.get(state, state) for state in states]
+    
+    # Create the selectbox with display names
+    selected_display_name = st.selectbox("**States Transportation Name**", display_name_list)
+    
+    # Find the abbreviation corresponding to the selected display name
+    selected_state = next((k for k, v in display_names.items() if v == selected_display_name), selected_display_name)
+
+    st.write(f"Selected State: {selected_state}")
 
 with col2:
-    if state != '--- select state ---':
-        route_query = f"SELECT Bus_Routes FROM BusRoutesAndLinks WHERE State_TransportationName = '{state}';"
+    if selected_state != '--- select state ---':
+        route_query = f"SELECT Bus_Routes FROM BusRoutesAndLinks WHERE State_TransportationName = '{selected_state}';"
         routes = fetch_distinct_value(conn, route_query)
         route = st.selectbox("**Routes**", ['--- select route ---'] + routes)
     else:
@@ -156,15 +207,26 @@ departure_condition = " OR ".join(departure_conditions) if departure_conditions 
 
 # Search Button
 if st.button("**Search**"):
-    if state != '--- select state ---' and route != '--- select route ---':
-        bus_type_condition = f"b.Bus_Type = '{bus_type}'" if bus_type != 'All' and bus_type != '--- select bus type ---' else "1=1"
+    if selected_state != '--- select state ---' and route != '--- select route ---':
+        bus_type_conditions = []
+        if bus_type_seater:
+            bus_type_conditions.append("Bus_Type LIKE '%Seater%' AND Bus_Type NOT LIKE '%Sleeper%'")
+        if bus_type_sleeper:
+            bus_type_conditions.append("Bus_Type LIKE '%Sleeper%' AND Bus_Type NOT LIKE '%Seater%'")
+        if bus_type_ac:
+            bus_type_conditions.append("(Bus_Type LIKE '%AC%' OR Bus_Type LIKE '%A/C%') AND Bus_Type NOT LIKE '%Non AC%'")
+        if bus_type_nonac:
+            bus_type_conditions.append("Bus_Type LIKE '%NON AC%'")
+        bus_type_condition = " OR ".join(bus_type_conditions) if bus_type_conditions else "1=1"
+    
+        
         query = f"""
             SELECT r.Bus_Routes, r.Routes_Links, b.Bus_Name, b.Bus_Type, 
                    b.Departure_Time, b.Travelling_Time, b.Reaching_Time, 
                    b.Bus_rating, b.Ticket_Price, b.Seat_Availability
             FROM BusRoutesAndLinks r
             JOIN BusDetails b ON r.Route_NO = b.Bus_No
-            WHERE r.State_TransportationName = '{state}' 
+            WHERE r.State_TransportationName = '{selected_state}' 
             AND r.Bus_Routes = '{route}'
             AND ({bus_type_condition})
             AND ({rating_condition})
@@ -180,3 +242,4 @@ if st.button("**Search**"):
             st.write("No buses available for the selected criteria.")
     else:
         st.write("Please select a state and route to search for buses.")
+
